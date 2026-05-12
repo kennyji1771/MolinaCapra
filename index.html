@@ -52,7 +52,7 @@
                 <h2 class="text-2xl font-poppins">🐐 Bienvenido, Álvaro</h2>
                 <p>Rebaño: <span id="total-goats">0</span> cabras | Producción media: <span id="avg-milk">0</span> L/día</p>
                 <button data-nav="herd" class="mt-3 bg-[#2B7A4B] text-white px-4 py-2 rounded-full">+ Agregar cabra</button>
-                <button id="forceSyncBtn" class="mt-3 ml-2 border border-[#2B7A4B] text-[#2B7A4B] px-4 py-2 rounded-full hidden"><i class="fas fa-cloud-upload-alt"></i> Sincronizar ahora</button>
+                <button id="forceSyncBtn" class="mt-3 ml-2 border border-[#2B7A4B] text-[#2B7A4B] px-4 py-2 rounded-full"><i class="fas fa-cloud-upload-alt"></i> Sincronizar ahora</button>
             </div>
             <div class="grid md:grid-cols-2 gap-6">
                 <div class="bg-white p-4 rounded-xl shadow"><i class="fas fa-dna text-[#2B7A4B] text-xl"></i> <h3>Proyecto genético</h3><p class="text-sm">Alpina×Nubia → Saanen → Canaria → raza sintética</p></div>
@@ -90,9 +90,8 @@
 
 <script>
     // ========== CONFIGURACIÓN GLOBAL ==========
-    // --->>> ¡¡¡ CAMBIA ESTA URL POR LA DE TU APPS SCRIPT !!! <<<---
+    // ¡¡¡ USA LA URL QUE COPIASTE DESDE GOOGLE APPS SCRIPT !!!
     const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzprWtTioe2aVBVMecsemZt3qeOp2oXVcGRLH14wJVRd8Lh6AI4eiepq1qSRmMXqpFvXw/exec";
-    // ============================================
 
     let goats = [];
     let diaryNotes = "";
@@ -253,7 +252,6 @@
         document.getElementById("cheese-calc").innerHTML = `<i class="fas fa-cheese"></i> ${escapeHtml(goat.name)} produce ${goat.milkL} L/día → potencial de ${cheeseKg} kg de queso diario.`;
     }
 
-    // ========== MODAL Y EVENTOS ==========
     function initModal() {
         let modalDiv = document.getElementById("goat-modal");
         if (modalDiv) return;
@@ -317,7 +315,6 @@
         document.getElementById("forceSyncBtn")?.addEventListener("click", () => syncToCloud(false));
     }
 
-    // ========== INICIALIZACIÓN ==========
     (async function init() {
         initModal();
         bindEvents();
