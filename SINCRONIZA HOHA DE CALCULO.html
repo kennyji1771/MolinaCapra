@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>MolinaCapra · Gestión caprina con nube</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;500;600;700&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        * { font-family: 'Inter', sans-serif; }
+        h1, h2, h3, .font-poppins { font-family: 'Poppins', sans-serif; }
+        body { background-color: #FEF9F0; }
+        .bg-primary { background-color: #2B7A4B; }
+        .text-primary { color: #2B7A4B; }
+        .border-primary { border-color: #2B7A4B; }
+        .hover\:bg-primary-dark:hover { background-color: #1e5a38; }
+        .card-hover { transition: transform 0.2s, box-shadow 0.2s; }
+        .card-hover:hover { transform: translateY(-4px); box-shadow: 0 20px 25px -12px rgba(0,0,0,0.1); border-left: 3px solid #2B7A4B; }
+        input:focus, select:focus, textarea:focus { border-color: #2B7A4B; box-shadow: 0 0 0 3px rgba(43,122,75,0.2); outline: none; }
+        .tree-line { border-left: 2px dashed #F4A261; margin-left: 1rem; padding-left: 1rem; }
+    </style>
+</head>
+<body>
+<div class="max-w-7xl mx-auto px-4 pb-20 md:pb-8">
+    <!-- Header -->
+    <header class="py-4 flex flex-wrap items-center justify-between gap-4 border-b mb-6">
+        <div class="flex items-center gap-2">
+            <i class="fas fa-goat text-3xl text-[#2B7A4B]"></i>
+            <h1 class="text-2xl font-poppins font-bold text-[#2B7A4B]">MolinaCapra</h1>
+        </div>
+        <nav class="flex gap-4 md:gap-6">
+            <button data-nav="home" class="nav-btn hover:text-[#2B7A4B]"><i class="fas fa-home"></i> Inicio</button>
+            <button data-nav="herd" class="nav-btn hover:text-[#2B7A4B]"><i class="fas fa-paw"></i> Rebaño</button>
+            <button data-nav="genealogy" class="nav-btn hover:text-[#2B7A4B]"><i class="fas fa-project-diagram"></i> Genealogía</button>
+            <button data-nav="notebook" class="nav-btn hover:text-[#2B7A4B]"><i class="fas fa-book"></i> Diario</button>
+            <button id="configBtn" class="text-gray-500 hover:text-[#2B7A4B]"><i class="fas fa-cog"></i></button>
+        </nav>
+    </header>
+
+    <!-- Config Modal -->
+    <div id="configModal" class="fixed inset-0 bg-black/50 hidden items-center justify-center z-50">
+        <div class="bg-white rounded-2xl p-6 max-w-md w-full mx-4">
+            <h3 class="font-poppins text-xl mb-3">Conectar con Google Sheets</h3>
+            <input type="text" id="apiUrl" placeholder="URL del Web App" class="w-full border p-2 rounded mb-2">
+            <button id="saveApiUrl" class="bg-[#2B7A4B] text-white px-4 py-2 rounded w-full">Guardar y sincronizar</button>
+            <button id="closeConfig" class="mt-2 text-gray-500 w-full">Cancelar</button>
+        </div>
+    </div>
+
+    <!-- Main Views -->
+    <main id="app-views">
+        <!-- Inicio -->
+        <div id="view-home" class="view active">
+            <div class="bg-gradient-to-r from-green-50 to-amber-50 rounded-2xl p-6 mb-8">
+                <h2 class="text-2xl font-poppins">🐐 Bienvenido, Álvaro</h2>
+                <p>Rebaño: <span id="total-goats">0</span> cabras | Producción media: <span id="avg-milk">0</span> L/día</p>
+                <button data-nav="herd" class="mt-3 bg-[#2B7A4B] text-white px-4 py-2 rounded-full">+ Agregar cabra</button>
+                <button id="syncBtn" class="mt-3 ml-2 border border-[#2B7A4B] text-[#2B7A4B] px-4 py-2 rounded-full"><i class="fas fa-cloud-upload-alt"></i> Sincronizar ahora</button>
+            </div>
+            <div class="grid md:grid-cols-2 gap-6">
+                <div class="bg-white p-4 rounded-xl shadow"><i class="fas fa-dna text-[#2B7A4B] text-xl"></i> <h3>Proyecto genético</h3><p class="text-sm">Alpina×Nubia → Saanen → Canaria → raza sintética</p></div>
+                <div class="bg-white p-4 rounded-xl shadow"><i class="fas fa-cheese text-[#2B7A4B] text-xl"></i> <h3>1 kg queso = 8 L leche</h3><p class="text-sm">Apuntando a >4% grasa</p></div>
+            </div>
+        </div>
+
+        <!-- Rebaño -->
+        <div id="view-herd" class="view hidden">
+            <div class="flex justify-between items-center mb-4"><h2 class="text-2xl font-poppins">Mi rebaño</h2><button id="new-goat-btn" class="bg-primary text-white px-4 py-2 rounded-lg"><i class="fas fa-plus"></i> Nueva cabra</button></div>
+            <div id="herd-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+        </div>
+
+        <!-- Genealogía -->
+        <div id="view-genealogy" class="view hidden">
+            <h2 class="text-2xl font-poppins mb-2">Árbol genealógico</h2>
+            <select id="genealogy-select" class="border p-2 rounded w-full md:w-64 mb-6"></select>
+            <div id="tree-container" class="bg-white p-4 rounded-xl shadow overflow-auto"></div>
+            <div class="mt-8"><h3 class="font-poppins font-semibold">Producción de queso</h3><div id="cheese-calc" class="bg-gray-50 p-3 rounded"></div></div>
+        </div>
+
+        <!-- Diario -->
+        <div id="view-notebook" class="view hidden">
+            <h2 class="text-2xl font-poppins mb-4">Cuaderno de campo - Álvaro</h2>
+            <textarea id="learning-notes" rows="8" class="w-full border rounded-xl p-4" placeholder="Anota observaciones sobre adaptación al clima, producción, salud, resultados de cruces..."></textarea>
+            <button id="save-notes" class="mt-2 bg-primary text-white px-4 py-2 rounded">Guardar notas</button>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <div class="fixed bottom-0 left-0 right-0 bg-white border-t text-center text-xs text-gray-400 py-2 md:static md:mt-10">
+        desarrollado por tu papá Gerard Sieveres · sincronización con Google Sheets
+    </div>
+</div>
+
+<script>
+    // ========== DATOS GLOBALES ==========
+    let goats = JSON.parse(localStorage.getItem("molina_goats")) || [];
+    let diaryNotes = localStorage.getItem("molina_notes") || "";
+    let webAppUrl = localStorage.getItem("molina_webapp_url") || "";
+
+    // ========== FUNCIONES AUXILIARES ==========
+    function saveGoats() { localStorage.setItem("molina_goats", JSON.stringify(goats)); updateDashboard(); }
+    function saveNotes() { localStorage.setItem("molina_notes", diaryNotes); }
+    
+    function updateDashboard() {
+        document.getElementById("total-goats").innerText = goats.length;
+        let producing = goats.filter(g => g.milkL > 0);
+        let avg = producing.length ? (producing.reduce((a,b)=>a+b.milkL,0)/producing.length).toFixed(1) : 0;
+        document.getElementById("avg-milk").innerText = avg;
+    }
+
+    // ========== RENDERIZADO DE INTERFACES ==========
+    function renderHerd() {
+        const grid = document.getElementById("herd-grid");
+        if(!grid) return;
+        if(goats.length === 0) { grid.innerHTML = '<div class="col-span-full text-center py-10 text-gray-500">Aún no hay cabras registradas. ¡Agrega tu primera!</div>'; return; }
+        grid.innerHTML = goats.map(g => `
+            <div class="bg-white rounded-xl shadow card-hover p-4 border">
+                <div class="flex justify-between"><h3 class="font-poppins font-bold">${g.name}</h3><span class="text-xs bg-gray-100 px-2 rounded-full">${g.breed || "Sin raza"}</span></div>
+                <p class="text-sm"><i class="fas fa-tint"></i> ${g.milkL || 0} L/día</p>
+                <p class="text-xs text-gray-500">Padre: ${g.father || "—"} · Madre: ${g.mother || "—"}</p>
+                <button class="edit-goat mt-2 text-primary text-sm" data-id="${g.id}">✏️ Editar</button>
+                <button class="delete-goat mt-2 text-red-500 text-sm ml-2" data-id="${g.id}">🗑️ Eliminar</button>
+            </div>`).join("");
+        document.querySelectorAll(".edit-goat").forEach(btn => btn.addEventListener("click", (e) => { let id = btn.dataset.id; editGoat(id); }));
+        document.querySelectorAll(".delete-goat").forEach(btn => btn.addEventListener("click", (e) => { let id = btn.dataset.id; goats = goats.filter(g => g.id !== id); saveGoats(); renderHerd(); renderGenealogySelect(); }));
+    }
+
+    function editGoat(id) {
+        let goat = goats.find(g => g.id === id);
+        if(!goat) return;
+        document.getElementById("goat-name").value = goat.name;
+        document.getElementById("goat-breed").value = goat.breed || "";
+        document.getElementById("goat-father").value = goat.father || "";
+        document.getElementById("goat-mother").value = goat.mother || "";
+        document.getElementById("goat-milk").value = goat.milkL || 0;
+        document.getElementById("goat-modal").classList.remove("hidden");
+        document.getElementById("goat-modal").style.display = "flex";
+        let saveBtn = document.getElementById("save-goat");
+        saveBtn.onclick = () => {
+            goat.name = document.getElementById("goat-name").value;
+            goat.breed = document.getElementById("goat-breed").value;
+            goat.father = document.getElementById("goat-father").value;
+            goat.mother = document.getElementById("goat-mother").value;
+            goat.milkL = parseFloat(document.getElementById("goat-milk").value) || 0;
+            saveGoats(); renderHerd(); renderGenealogySelect();
+            document.getElementById("goat-modal").style.display = "none";
+        };
+    }
+
+    function renderGenealogySelect() {
+        const sel = document.getElementById("genealogy-select");
+        if(sel) { sel.innerHTML = goats.map(g => `<option value="${g.id}">${g.name} (${g.breed || "?"})</option>`).join(""); }
+    }
+
+    function updateTreeAndCheese() {
+        const selectedId = document.getElementById("genealogy-select")?.value;
+        if(!selectedId) return;
+        const goat = goats.find(g => g.id === selectedId);
+        if(!goat) return;
+        const father = goats.find(g => g.name === goat.father);
+        const mother = goats.find(g => g.name === goat.mother);
+        const gf = father ? goats.find(g => g.name === father.father) : null;
+        const gm = father ? goats.find(g => g.name === father.mother) : null;
+        const mf = mother ? goats.find(g => g.name === mother.father) : null;
+        const mm = mother ? goats.find(g => g.name === mother.mother) : null;
+        document.getElementById("tree-container").innerHTML = `
+            <div class="font-mono"><strong>${goat.name}</strong> (${goat.breed || "?"})<div class="tree-line">Padre: ${father ? father.name : goat.father || "?"}<br>Madre: ${mother ? mother.name : goat.mother || "?"}</div>
+            ${gf||gm||mf||mm ? `<div class="tree-line">Abuelos: ${gf ? gf.name : "?"} / ${gm ? gm.name : "?"} (paternos) &nbsp; ${mf ? mf.name : "?"} / ${mm ? mm.name : "?"} (maternos)</div>` : ""}
+            </div>`;
+        const cheeseKg = (goat.milkL / 8).toFixed(2);
+        document.getElementById("cheese-calc").innerHTML = `<i class="fas fa-cheese"></i> ${goat.name} produce ${goat.milkL} L/día → potencial de ${cheeseKg} kg de queso diario.`;
+    }
+
+    // ========== SINCRONIZACIÓN CON GOOGLE SHEETS ==========
+    async function syncToCloud() {
+        if (!webAppUrl) { alert("⚠️ Primero configura la URL en el engranaje ⚙️"); return; }
+        try {
+            // 1. Subir cabras
+            let res1 = await fetch(webAppUrl, {
+                method: "POST",
+                mode: "cors",
+                body: JSON.stringify({ action: "set_cabras", cabras: goats })
+            });
+            // 2. Subir notas
+            let res2 = await fetch(webAppUrl, {
+                method: "POST",
+                body: JSON.stringify({ action: "set_notas", notas: diaryNotes })
+            });
+            if (res1.ok && res2.ok) alert("✅ Datos sincronizados con Google Sheets");
+            else throw new Error("Error en la sincronización");
+        } catch(e) { alert("❌ No se pudo conectar: " + e.message); }
+    }
+
+    async function loadFromCloud() {
+        if (!webAppUrl) return;
+        try {
+            let resCabras = await fetch(webAppUrl + "?action=get_cabras");
+            let dataCabras = await resCabras.json();
+            if (dataCabras.success && dataCabras.cabras) {
+                goats = dataCabras.cabras;
+                localStorage.setItem("molina_goats", JSON.stringify(goats));
+                location.reload();
+            }
+            let resNotas = await fetch(webAppUrl + "?action=get_notas");
+            let dataNotas = await resNotas.json();
+            if (dataNotas.success && dataNotas.notas) {
+                diaryNotes = dataNotas.notas;
+                localStorage.setItem("molina_notes", diaryNotes);
+            }
+            alert("Datos cargados desde la nube");
+        } catch(e) { console.warn("No se pudo cargar desde la nube", e); }
+    }
+
+    // ========== MODAL REGISTRO CABRA ==========
+    function initModal() {
+        let modalDiv = document.createElement('div');
+        modalDiv.id = "goat-modal";
+        modalDiv.className = "fixed inset-0 bg-black/50 hidden items-center justify-center z-50";
+        modalDiv.innerHTML = `
+            <div class="bg-white rounded-2xl p-6 max-w-md w-full mx-4">
+                <h3 class="font-poppins text-xl mb-3">Registrar cabra</h3>
+                <input type="text" id="goat-name" placeholder="Nombre" class="w-full border p-2 rounded mb-2">
+                <input type="text" id="goat-breed" placeholder="Composición racial (ej: Alpina×Nubia F1)" class="w-full border p-2 rounded mb-2">
+                <input type="text" id="goat-father" placeholder="Padre (nombre)" class="w-full border p-2 rounded mb-2">
+                <input type="text" id="goat-mother" placeholder="Madre (nombre)" class="w-full border p-2 rounded mb-2">
+                <input type="number" id="goat-milk" placeholder="Producción diaria (litros)" class="w-full border p-2 rounded mb-2" step="0.1">
+                <div class="flex justify-end gap-2"><button id="close-modal" class="px-4 py-2 border rounded">Cancelar</button><button id="save-goat" class="bg-primary text-white px-4 py-2 rounded">Guardar</button></div>
+            </div>`;
+        document.body.appendChild(modalDiv);
+        document.getElementById("close-modal")?.addEventListener("click", () => document.getElementById("goat-modal").style.display = "none");
+    }
+
+    // ========== CONFIGURACIÓN ==========
+    function bindConfigEvents() {
+        document.getElementById("configBtn")?.addEventListener("click", () => {
+            document.getElementById("apiUrl").value = webAppUrl;
+            document.getElementById("configModal").classList.remove("hidden");
+            document.getElementById("configModal").style.display = "flex";
+        });
+        document.getElementById("closeConfig")?.addEventListener("click", () => {
+            document.getElementById("configModal").style.display = "none";
+        });
+        document.getElementById("saveApiUrl")?.addEventListener("click", () => {
+            webAppUrl = document.getElementById("apiUrl").value.trim();
+            localStorage.setItem("molina_webapp_url", webAppUrl);
+            document.getElementById("configModal").style.display = "none";
+            loadFromCloud();
+        });
+        document.getElementById("syncBtn")?.addEventListener("click", syncToCloud);
+        document.getElementById("new-goat-btn")?.addEventListener("click", () => {
+            document.getElementById("goat-name").value = ""; document.getElementById("goat-breed").value = ""; 
+            document.getElementById("goat-father").value = ""; document.getElementById("goat-mother").value = ""; 
+            document.getElementById("goat-milk").value = "";
+            document.getElementById("goat-modal").style.display = "flex";
+            let saveBtn = document.getElementById("save-goat");
+            saveBtn.onclick = () => {
+                const newGoat = {
+                    id: "g"+Date.now(),
+                    name: document.getElementById("goat-name").value,
+                    breed: document.getElementById("goat-breed").value,
+                    father: document.getElementById("goat-father").value,
+                    mother: document.getElementById("goat-mother").value,
+                    milkL: parseFloat(document.getElementById("goat-milk").value) || 0,
+                    notes: ""
+                };
+                goats.push(newGoat);
+                saveGoats(); renderHerd(); renderGenealogySelect();
+                document.getElementById("goat-modal").style.display = "none";
+            };
+        });
+        document.getElementById("save-notes")?.addEventListener("click", () => { diaryNotes = document.getElementById("learning-notes").value; localStorage.setItem("molina_notes", diaryNotes); alert("Notas guardadas"); });
+        document.getElementById("genealogy-select")?.addEventListener("change", updateTreeAndCheese);
+        
+        document.querySelectorAll(".nav-btn").forEach(btn => btn.addEventListener("click", (e) => {
+            let view = btn.dataset.nav;
+            document.querySelectorAll(".view").forEach(v => v.classList.add("hidden"));
+            document.getElementById(`view-${view}`).classList.remove("hidden");
+            if(view === "herd") renderHerd();
+            if(view === "genealogy") { renderGenealogySelect(); updateTreeAndCheese(); }
+            if(view === "notebook") { document.getElementById("learning-notes").value = diaryNotes; }
+        }));
+    }
+
+    // ========== INICIALIZACIÓN ==========
+    initModal();
+    bindConfigEvents();
+    renderHerd();
+    renderGenealogySelect();
+    updateDashboard();
+    if (webAppUrl) loadFromCloud().catch(e=>console.log);
+</script>
+</body>
+</html>

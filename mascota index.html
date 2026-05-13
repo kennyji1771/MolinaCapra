@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Huella Feliz · Agencia de Adopción de Mascotas</title>
+    <!-- Google Fonts + Tailwind + Font Awesome -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        * {
+            font-family: 'Inter', sans-serif;
+        }
+        h1, h2, h3, .font-poppins {
+            font-family: 'Poppins', sans-serif;
+        }
+        body {
+            background-color: #FEF9F0;
+        }
+        /* Colores personalizados */
+        .bg-primary { background-color: #2B7A4B; }
+        .text-primary { color: #2B7A4B; }
+        .border-primary { border-color: #2B7A4B; }
+        .bg-secondary { background-color: #F4A261; }
+        .bg-accent { background-color: #E9C46A; }
+        .hover\:bg-primary-dark:hover { background-color: #1e5a38; }
+        .focus-ring:focus { outline: 2px solid #2B7A4B; outline-offset: 2px; }
+        
+        /* transiciones suaves */
+        .card-hover {
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        .card-hover:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 20px 25px -12px rgba(0, 0, 0, 0.1), 0 4px 8px -4px rgba(0, 0, 0, 0.02);
+            border-left: 3px solid #2B7A4B;
+        }
+        .sticky-btn {
+            position: sticky;
+            bottom: 1rem;
+            z-index: 20;
+        }
+        /* skeleton loading */
+        .skeleton {
+            background: linear-gradient(90deg, #e0e0e0 25%, #f0f0f0 50%, #e0e0e0 75%);
+            background-size: 200% 100%;
+            animation: loading 1.5s infinite;
+        }
+        @keyframes loading {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+        /* tooltip simple */
+        [data-tooltip] {
+            position: relative;
+            cursor: help;
+        }
+        [data-tooltip]:before {
+            content: attr(data-tooltip);
+            position: absolute;
+            bottom: 125%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #1e293b;
+            color: white;
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-size: 12px;
+            white-space: nowrap;
+            display: none;
+            z-index: 50;
+        }
+        [data-tooltip]:hover:before {
+            display: block;
+        }
+        /* progress bar animate */
+        .progress-step {
+            transition: all 0.2s;
+        }
+        input:focus, select:focus, textarea:focus {
+            border-color: #2B7A4B;
+            box-shadow: 0 0 0 3px rgba(43, 122, 75, 0.2);
+            outline: none;
+        }
+        @media (max-width: 640px) {
+            .filter-drawer {
+                position: fixed;
+                bottom: 0;
+                left: 0;
+                right: 0;
+                background: white;
+                border-radius: 20px 20px 0 0;
+                box-shadow: 0 -4px 20px rgba(0,0,0,0.1);
+                padding: 1rem;
+                z-index: 40;
+                transform: translateY(100%);
+                transition: transform 0.3s ease;
+            }
+            .filter-drawer.open {
+                transform: translateY(0);
+            }
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <!-- App wrapper -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-20 md:pb-8">
+        
+        <!-- HEADER / NAV (Desktop + Mobile bar) -->
+        <header class="py-4 flex flex-wrap items-center justify-between gap-4 border-b border-gray-200 mb-6">
+            <div class="flex items-center gap-2">
+                <i class="fas fa-paw text-3xl text-primary"></i>
+                <h1 class="text-2xl font-poppins font-bold text-primary">Huella Feliz</h1>
+            </div>
+            <!-- Navegación escritorio + mobile -->
+            <nav class="flex gap-4 md:gap-6 text-gray-700 font-medium">
+                <button data-nav="home" class="nav-btn hover:text-primary transition flex items-center gap-1"><i class="fas fa-home"></i> <span class="hidden sm:inline">Inicio</span></button>
+                <button data-nav="list" class="nav-btn hover:text-primary transition flex items-center gap-1"><i class="fas fa-dog"></i> <span class="hidden sm:inline">Mascotas</span></button>
+                <button data-nav="applications" class="nav-btn hover:text-primary transition flex items-center gap-1"><i class="fas fa-file-alt"></i> <span class="hidden sm:inline">Mis solicitudes</span></button>
+            </nav>
+        </header>
+
+        <!-- VISTAS DINÁMICAS -->
+        <main id="app-views">
+            <!-- HOME VIEW (inicio) -->
+            <div id="view-home" class="view active">
+                <div class="bg-gradient-to-r from-green-50 to-amber-50 rounded-2xl p-6 mb-10 text-center md:text-left flex flex-wrap items-center justify-between">
+                    <div>
+                        <h2 class="text-3xl font-poppins font-bold text-gray-800">Ellos te esperan 🐾</h2>
+                        <p class="text-gray-600 mt-2 max-w-md">Adopta un compañero fiel, dale una segunda oportunidad. Proceso simple, responsable y lleno de amor.</p>
+                        <button data-nav="list" class="mt-4 bg-primary text-white px-5 py-2 rounded-full hover:bg-primary-dark transition shadow">Ver mascotas disponibles →</button>
+                    </div>
+                    <i class="fas fa-hand-holding-heart text-7xl text-primary/30 mt-4 md:mt-0"></i>
+                </div>
+                <h3 class="text-xl font-poppins font-semibold mb-4">⭐ Destacados de la semana</h3>
+                <div id="featured-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+                <div class="mt-8 text-center">
+                    <button data-nav="list" class="text-primary font-medium hover:underline">+ Ver todas las mascotas</button>
+                </div>
+            </div>
+
+            <!-- LISTADO + FILTROS -->
+            <div id="view-list" class="view hidden">
+                <div class="flex flex-col md:flex-row gap-6">
+                    <!-- Panel filtros desktop -->
+                    <aside class="md:w-72 bg-white p-5 rounded-xl shadow-sm h-fit sticky top-4">
+                        <h3 class="font-poppins font-semibold flex items-center gap-2"><i class="fas fa-sliders-h text-primary"></i> Filtros</h3>
+                        <div class="mt-4 space-y-4">
+                            <div><label class="block text-sm font-medium">Especie</label><select id="filter-species" class="w-full border rounded-lg p-2 mt-1"><option value="">Todas</option><option value="perro">Perro</option><option value="gato">Gato</option></select></div>
+                            <div><label class="block text-sm font-medium">Edad</label><select id="filter-age" class="w-full border rounded-lg p-2"><option value="">Cualquier</option><option value="cachorro">Cachorro (<1 año)</option><option value="joven">Joven (1-3 años)</option><option value="adulto">Adulto (>3 años)</option></select></div>
+                            <div><label class="block text-sm font-medium">Tamaño</label><select id="filter-size" class="w-full border rounded-lg p-2"><option value="">Cualquier</option><option value="pequeño">Pequeño</option><option value="mediano">Mediano</option><option value="grande">Grande</option></select></div>
+                            <div><label class="block text-sm font-medium">Personalidad</label><select id="filter-personality" class="w-full border rounded-lg p-2"><option value="">Todas</option><option value="tranquilo">Tranquilo</option><option value="activo">Activo</option><option value="sociable">Sociable</option></select></div>
+                            <button id="apply-filters" class="w-full bg-primary text-white py-2 rounded-lg mt-2 hover:bg-primary-dark">Aplicar filtros</button>
+                        </div>
+                    </aside>
+                    <!-- Grid mascotas -->
+                    <div class="flex-1">
+                        <div class="flex justify-between items-center mb-4"><h2 class="text-2xl font-poppins font-semibold">Encuentra tu nuevo amigo</h2><span id="result-count" class="text-gray-500 text-sm"></span></div>
+                        <div id="pets-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+                    </div>
+                </div>
+                <!-- Filtros móvil (bottom sheet) -->
+                <div id="mobile-filter-overlay" class="fixed inset-0 bg-black/40 z-50 hidden"></div>
+                <div id="mobile-filter-drawer" class="filter-drawer fixed left-0 right-0 bottom-0 bg-white rounded-t-2xl shadow-xl z-50 hidden transition-transform">
+                    <div class="p-4"><div class="flex justify-between"><h3 class="font-bold">Filtros</h3><button id="close-filters"><i class="fas fa-times"></i></button></div>
+                    <div class="space-y-3 mt-2"><select id="mobile-filter-species" class="w-full border p-2 rounded"><option value="">Especie</option><option value="perro">Perro</option><option value="gato">Gato</option></select>
+                    <select id="mobile-filter-age" class="w-full border p-2 rounded"><option value="">Edad</option><option value="cachorro">Cachorro</option><option value="joven">Joven</option><option value="adulto">Adulto</option></select>
+                    <select id="mobile-filter-size" class="w-full border p-2 rounded"><option value="">Tamaño</option><option value="pequeño">Pequeño</option><option value="mediano">Mediano</option><option value="grande">Grande</option></select>
+                    <select id="mobile-filter-personality" class="w-full border p-2 rounded"><option value="">Personalidad</option><option value="tranquilo">Tranquilo</option><option value="activo">Activo</option><option value="sociable">Sociable</option></select>
+                    <button id="mobile-apply-filters" class="w-full bg-primary text-white py-2 rounded">Aplicar</button></div></div>
+                </div>
+                <button id="open-mobile-filters" class="md:hidden fixed bottom-20 right-4 bg-primary text-white p-3 rounded-full shadow-lg z-30"><i class="fas fa-filter"></i></button>
+            </div>
+
+            <!-- PERFIL MASCOTA (detalle) -->
+            <div id="view-pet-detail" class="view hidden">
+                <button id="back-to-list" class="text-primary mb-4 flex items-center gap-1"><i class="fas fa-arrow-left"></i> Volver</button>
+                <div id="pet-detail-container" class="bg-white rounded-2xl shadow overflow-hidden"></div>
+            </div>
+
+            <!-- FORMULARIO DE SOLICITUD (5 pasos visual) -->
+            <div id="view-form" class="view hidden">
+                <button id="close-form" class="text-gray-500 mb-4 flex items-center gap-1"><i class="fas fa-times"></i> Cancelar</button>
+                <div class="bg-white rounded-2xl p-5 md:p-8 shadow-md max-w-2xl mx-auto">
+                    <div class="mb-6"><div class="flex justify-between text-sm font-medium text-gray-500"><span>Paso 1/4</span><span id="form-step-indicator">Datos contacto</span></div><div class="w-full bg-gray-200 rounded-full h-2 mt-1"><div id="form-progress-bar" class="bg-primary h-2 rounded-full" style="width: 25%;"></div></div></div>
+                    <form id="adoption-form">
+                        <div id="form-step-1" class="form-step">
+                            <h3 class="font-poppins text-xl mb-3">📋 Datos de contacto</h3><div class="space-y-3"><input type="text" id="nombre" placeholder="Nombre completo" required class="w-full border p-2 rounded"><input type="email" id="email" placeholder="Correo electrónico" required class="w-full border p-2 rounded"><input type="tel" id="telefono" placeholder="Teléfono" required class="w-full border p-2 rounded"></div>
+                        </div>
+                        <div id="form-step-2" class="form-step hidden"><h3 class="font-poppins text-xl mb-3">🏠 Vivienda</h3><select id="vivienda" class="w-full border p-2 rounded mb-2"><option value="">Selecciona</option><option value="casa">Casa con jardín</option><option value="departamento">Departamento</option></select><label class="block mt-2">¿Tiene otros animales?</label><select id="otros_animales" class="w-full border p-2 rounded"><option value="no">No</option><option value="si">Sí</option></select></div>
+                        <div id="form-step-3" class="form-step hidden"><h3 class="font-poppins text-xl mb-3">🐾 Experiencia previa</h3><textarea id="experiencia" rows="3" placeholder="Cuéntanos si has tenido mascotas antes..." class="w-full border p-2 rounded"></textarea><label class="mt-2 block">Motivo de adopción</label><textarea id="motivo" rows="2" placeholder="¿Por qué quieres adoptar?" class="w-full border p-2 rounded"></textarea></div>
+                        <div id="form-step-4" class="form-step hidden"><h3 class="font-poppins text-xl mb-3">✅ Confirmar solicitud</h3><p class="bg-gray-50 p-3 rounded">Mascota: <strong id="form-pet-name"></strong></p><p class="text-sm text-gray-600">Al enviar aceptas el proceso de adopción responsable. Un asistente se comunicará en 48h.</p><div class="form-check mt-2"><input type="checkbox" id="confirmacion" required> <label>Confirmo que la información es verídica</label></div></div>
+                        <div class="flex justify-between mt-6"><button type="button" id="prev-step" class="px-4 py-2 border rounded disabled:opacity-50" disabled>Anterior</button><button type="button" id="next-step" class="bg-primary text-white px-5 py-2 rounded">Siguiente</button><button type="submit" id="submit-form-btn" class="bg-green-700 text-white px-5 py-2 rounded hidden">Enviar solicitud</button></div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- MIS SOLICITUDES (Timeline) -->
+            <div id="view-applications" class="view hidden">
+                <h2 class="text-2xl font-poppins font-semibold mb-5">Mis procesos de adopción</h2>
+                <div id="applications-list" class="space-y-4"></div>
+                <div id="no-apps-message" class="text-center text-gray-400 py-10 hidden">Aún no has enviado ninguna solicitud. ¡Anímate a adoptar!</div>
+            </div>
+        </main>
+
+        <!-- Barra inferior móvil (mobile bottom nav) -->
+        <div class="fixed bottom-0 left-0 right-0 bg-white border-t flex justify-around py-2 md:hidden z-30 shadow-lg">
+            <button data-nav="home" class="nav-mobile flex flex-col items-center text-gray-600"><i class="fas fa-home text-xl"></i><span class="text-xs">Inicio</span></button>
+            <button data-nav="list" class="nav-mobile flex flex-col items-center text-gray-600"><i class="fas fa-dog text-xl"></i><span class="text-xs">Mascotas</span></button>
+            <button data-nav="applications" class="nav-mobile flex flex-col items-center text-gray-600"><i class="fas fa-file-alt text-xl"></i><span class="text-xs">Solicitudes</span></button>
+        </div>
+    </div>
+
+    <script>
+        // ---------- DATA BASE DE MASCOTAS ----------
+        const pets = [
+            { id: 1, name: "Luna", species: "gato", ageYears: 0.6, ageCategory: "cachorro", size: "pequeño", personality: "tranquilo", description: "Luna es una gata muy cariñosa, ideal para departamento.", healthInfo: "Vacunada, desparasitada, esterilizada", requirements: "Espacio con rascador", image: "https://source.unsplash.com/featured/300x300/?cat,kitten", history: "Rescatada de una colonia, sociable." },
+            { id: 2, name: "Max", species: "perro", ageYears: 2, ageCategory: "joven", size: "mediano", personality: "activo", description: "Max ama los paseos y juegos al aire libre.", healthInfo: "Vacunas completas, chip", requirements: "Familia activa", image: "https://source.unsplash.com/featured/300x300/?dog,playful", history: "Vivía en refugio, busca compañía." },
+            { id: 3, name: "Simba", species: "gato", ageYears: 4, ageCategory: "adulto", size: "mediano", personality: "tranquilo", description: "Simba es un gato independiente pero amigable.", healthInfo: "Sano, esterilizado", requirements: "Ambiente tranquilo", image: "https://source.unsplash.com/featured/300x300/?orange-cat", history: "Dueño anterior no podía cuidarlo." },
+            { id: 4, name: "Rocky", species: "perro", ageYears: 1, ageCategory: "cachorro", size: "grande", personality: "activo", description: "Cachorro enorme lleno de energía.", healthInfo: "Primeras vacunas", requirements: "Espacio amplio", image: "https://source.unsplash.com/featured/300x300/?puppy", history: "Abandonado en parque." },
+            { id: 5, name: "Nala", species: "gato", ageYears: 1.5, ageCategory: "joven", size: "pequeño", personality: "sociable", description: "Nala ama dormir junto a su humano.", healthInfo: "Esterilizada", requirements: "Cariño constante", image: "https://source.unsplash.com/featured/300x300/?grey-cat", history: "Rescatada con sus hermanos." },
+            { id: 6, name: "Toby", species: "perro", ageYears: 5, ageCategory: "adulto", size: "pequeño", personality: "tranquilo", description: "Toby es un perrito anciano muy apacible.", healthInfo: "Control veterinario al día", requirements: "Poco ejercicio, amor", image: "https://source.unsplash.com/featured/300x300/?small-dog", history: "Perdido y no reclamado." }
+        ];
+        
+        let applications = JSON.parse(localStorage.getItem("adoption_apps")) || [];
+        let currentPetForAdoption = null;
+        let currentView = "home";
+        let currentFilters = { species: "", age: "", size: "", personality: "" };
+        
+        // Helper guardar apps
+        function saveApplications() { localStorage.setItem("adoption_apps", JSON.stringify(applications)); }
+
+        // Render helpers
+        function renderFeatured() {
+            const featured = pets.slice(0, 3);
+            const container = document.getElementById("featured-grid");
+            container.innerHTML = featured.map(pet => createPetCard(pet)).join("");
+            attachCardEvents();
+        }
+
+        function createPetCard(pet) {
+            return `<div class="pet-card bg-white rounded-xl overflow-hidden shadow card-hover cursor-pointer transition-all border border-gray-100" data-id="${pet.id}">
+                        <img src="${pet.image}" alt="${pet.name}" class="w-full h-48 object-cover">
+                        <div class="p-4"><div class="flex justify-between"><h3 class="font-poppins font-bold text-lg">${pet.name}</h3><span class="text-xs bg-gray-100 px-2 py-1 rounded-full">${pet.species}</span></div>
+                        <p class="text-gray-500 text-sm mt-1">${pet.personality} · ${pet.size}</p>
+                        <div class="mt-2 flex flex-wrap gap-1"><span class="text-xs bg-primary/10 text-primary px-2 rounded-full">${pet.ageCategory}</span></div>
+                        <div class="mt-3 text-primary text-sm font-medium">Conóceme →</div></div>
+                    </div>`;
+        }
+
+        function attachCardEvents() {
+            document.querySelectorAll(".pet-card").forEach(card => {
+                card.addEventListener("click", (e) => { const id = parseInt(card.dataset.id); showPetDetail(id); });
+            });
+        }
+
+        function renderFilteredList() {
+            let filtered = pets.filter(p => {
+                if (currentFilters.species && p.species !== currentFilters.species) return false;
+                if (currentFilters.age && p.ageCategory !== currentFilters.age) return false;
+                if (currentFilters.size && p.size !== currentFilters.size) return false;
+                if (currentFilters.personality && p.personality !== currentFilters.personality) return false;
+                return true;
+            });
+            const grid = document.getElementById("pets-grid");
+            if (grid) grid.innerHTML = filtered.map(p => createPetCard(p)).join("");
+            document.getElementById("result-count").innerText = `${filtered.length} mascotas encontradas`;
+            attachCardEvents();
+        }
+
+        function showPetDetail(petId) {
+            const pet = pets.find(p => p.id === petId);
+            if (!pet) return;
+            const container = document.getElementById("pet-detail-container");
+            container.innerHTML = `
+                <div class="md:flex"><img src="${pet.image}" class="md:w-1/2 w-full h-80 object-cover" alt="${pet.name}">
+                <div class="p-6 flex-1"><div class="flex justify-between"><h2 class="text-3xl font-poppins font-bold">${pet.name}</h2><span class="bg-secondary/20 text-secondary px-3 py-1 rounded-full">${pet.species}</span></div>
+                <div class="mt-2 flex gap-2 text-sm"><i class="fas fa-calendar-alt"></i> ${pet.ageCategory} · ${pet.size} · ${pet.personality}</div>
+                <p class="mt-4 text-gray-700">${pet.description}</p><div class="mt-3 bg-gray-50 p-3 rounded"><p><strong>📖 Historia:</strong> ${pet.history}</p><p class="mt-1"><strong>🩺 Salud:</strong> ${pet.healthInfo}</p><p><strong>🏠 Requisitos:</strong> ${pet.requirements}</p></div>
+                <div class="sticky-btn mt-6"><button id="adopt-now-btn" class="w-full bg-primary text-white py-3 rounded-full text-lg font-semibold shadow-md hover:bg-primary-dark transition"><i class="fas fa-heart mr-2"></i> Quiero adoptar</button></div></div></div>`;
+            document.getElementById("adopt-now-btn").addEventListener("click", () => startAdoption(pet));
+            showView("pet-detail");
+        }
+
+        function startAdoption(pet) {
+            currentPetForAdoption = pet;
+            document.getElementById("form-pet-name").innerText = pet.name;
+            // reset formulario y paso 1
+            document.getElementById("adoption-form").reset();
+            currentFormStep = 1;
+            updateFormStepDisplay();
+            showView("form");
+        }
+
+        let currentFormStep = 1;
+        function updateFormStepDisplay() {
+            for(let i=1;i<=4;i++) {
+                const stepDiv = document.getElementById(`form-step-${i}`);
+                if(stepDiv) stepDiv.classList.toggle("hidden", i !== currentFormStep);
+            }
+            const nextBtn = document.getElementById("next-step");
+            const prevBtn = document.getElementById("prev-step");
+            const submitBtn = document.getElementById("submit-form-btn");
+            const progressBar = document.getElementById("form-progress-bar");
+            const stepIndicator = document.getElementById("form-step-indicator");
+            if(currentFormStep === 1) { stepIndicator.innerText = "Datos contacto"; progressBar.style.width = "25%"; prevBtn.disabled=true; nextBtn.classList.remove("hidden"); submitBtn.classList.add("hidden");}
+            else if(currentFormStep === 2) { stepIndicator.innerText = "Vivienda"; progressBar.style.width="50%"; prevBtn.disabled=false; nextBtn.classList.remove("hidden"); submitBtn.classList.add("hidden");}
+            else if(currentFormStep === 3) { stepIndicator.innerText = "Experiencia"; progressBar.style.width="75%"; prevBtn.disabled=false; nextBtn.classList.remove("hidden"); submitBtn.classList.add("hidden");}
+            else if(currentFormStep === 4) { stepIndicator.innerText = "Confirmar"; progressBar.style.width="100%"; nextBtn.classList.add("hidden"); submitBtn.classList.remove("hidden"); prevBtn.disabled=false;}
+        }
+
+        function nextStep() { if(currentFormStep < 4) { currentFormStep++; updateFormStepDisplay();} }
+        function prevStep() { if(currentFormStep > 1) { currentFormStep--; updateFormStepDisplay();} }
+
+        function submitForm(e) {
+            e.preventDefault();
+            const nombre = document.getElementById("nombre").value.trim();
+            const email = document.getElementById("email").value.trim();
+            const telefono = document.getElementById("telefono").value.trim();
+            const vivienda = document.getElementById("vivienda").value;
+            const otros = document.getElementById("otros_animales").value;
+            const experiencia = document.getElementById("experiencia").value;
+            const motivo = document.getElementById("motivo").value;
+            const confirm = document.getElementById("confirmacion").checked;
+            if(!nombre || !email || !telefono || !vivienda || !confirm) { alert("Completa los campos obligatorios"); return; }
+            if(!currentPetForAdoption) return;
+            const newApp = {
+                id: Date.now(),
+                petId: currentPetForAdoption.id,
+                petName: currentPetForAdoption.name,
+                nombre, email, telefono, vivienda, otros, experiencia, motivo,
+                status: "pendiente",
+                date: new Date().toLocaleDateString()
+            };
+            applications.unshift(newApp);
+            saveApplications();
+            alert("¡Solicitud enviada! Revisa 'Mis solicitudes' para el seguimiento.");
+            renderApplicationsView();
+            showView("applications");
+        }
+
+        function renderApplicationsView() {
+            const container = document.getElementById("applications-list");
+            const noMsg = document.getElementById("no-apps-message");
+            if(applications.length === 0) { container.innerHTML = ""; noMsg.classList.remove("hidden"); return; }
+            noMsg.classList.add("hidden");
+            container.innerHTML = applications.map(app => `
+                <div class="bg-white rounded-xl p-4 shadow-sm border-l-4 border-primary">
+                    <div class="flex flex-wrap justify-between items-start"><div><h3 class="font-poppins font-bold">${app.petName}</h3><p class="text-sm text-gray-500">Solicitud: ${app.date}</p></div><span class="px-3 py-1 rounded-full text-xs font-semibold ${app.status === 'pendiente' ? 'bg-yellow-100 text-yellow-800' : 'bg-green-100 text-green-800'}">${app.status === 'pendiente' ? 'En revisión' : 'Aprobada'}</span></div>
+                    <div class="mt-3 flex gap-2 text-xs"><i class="fas fa-user"></i> ${app.nombre}</div>
+                    <div class="mt-2 flex items-center gap-2 text-xs text-gray-500"><i class="fas fa-timeline"></i> Proceso: <span class="font-medium">📩 Enviado → 🗓️ Entrevista pendiente → 🏡 Visita</span></div>
+                </div>`).join("");
+        }
+
+        // showView router
+        function showView(viewName, param=null) {
+            document.querySelectorAll(".view").forEach(v => v.classList.add("hidden"));
+            document.getElementById(`view-${viewName}`).classList.remove("hidden");
+            currentView = viewName;
+            if(viewName === "home") renderFeatured();
+            if(viewName === "list") renderFilteredList();
+            if(viewName === "applications") renderApplicationsView();
+            if(viewName === "pet-detail") {}
+            if(viewName === "form") {}
+        }
+
+        // Event listeners
+        function bindGlobalEvents() {
+            document.querySelectorAll(".nav-btn, .nav-mobile").forEach(btn => {
+                btn.addEventListener("click", (e) => { const view = btn.dataset.nav; if(view) showView(view); });
+            });
+            document.getElementById("apply-filters")?.addEventListener("click", () => {
+                currentFilters.species = document.getElementById("filter-species").value;
+                currentFilters.age = document.getElementById("filter-age").value;
+                currentFilters.size = document.getElementById("filter-size").value;
+                currentFilters.personality = document.getElementById("filter-personality").value;
+                renderFilteredList();
+            });
+            document.getElementById("open-mobile-filters")?.addEventListener("click", () => { document.getElementById("mobile-filter-drawer").classList.add("open"); document.getElementById("mobile-filter-drawer").classList.remove("hidden"); document.getElementById("mobile-filter-overlay").classList.remove("hidden"); });
+            document.getElementById("close-filters")?.addEventListener("click", () => { document.getElementById("mobile-filter-drawer").classList.remove("open"); setTimeout(()=>{document.getElementById("mobile-filter-drawer").classList.add("hidden"); document.getElementById("mobile-filter-overlay").classList.add("hidden");},300);});
+            document.getElementById("mobile-apply-filters")?.addEventListener("click", () => {
+                currentFilters.species = document.getElementById("mobile-filter-species").value;
+                currentFilters.age = document.getElementById("mobile-filter-age").value;
+                currentFilters.size = document.getElementById("mobile-filter-size").value;
+                currentFilters.personality = document.getElementById("mobile-filter-personality").value;
+                document.getElementById("filter-species").value = currentFilters.species;
+                document.getElementById("filter-age").value = currentFilters.age;
+                document.getElementById("filter-size").value = currentFilters.size;
+                document.getElementById("filter-personality").value = currentFilters.personality;
+                renderFilteredList();
+                document.getElementById("close-filters").click();
+            });
+            document.getElementById("next-step")?.addEventListener("click", nextStep);
+            document.getElementById("prev-step")?.addEventListener("click", prevStep);
+            document.getElementById("adoption-form")?.addEventListener("submit", submitForm);
+            document.getElementById("close-form")?.addEventListener("click", () => showView("list"));
+            document.getElementById("back-to-list")?.addEventListener("click", () => showView("list"));
+        }
+
+        renderFeatured();
+        bindGlobalEvents();
+        showView("home");
+        if(window.innerWidth < 768) document.getElementById("mobile-filter-drawer")?.classList.add("hidden");
+    </script>
+</body>
+</html>
